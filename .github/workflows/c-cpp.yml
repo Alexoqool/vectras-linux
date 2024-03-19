@@ -25,16 +25,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install sphinx==5.3.0 sphinx_rtd_theme meson
 
-    - name: Install Ninja build system
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ninja-build
-    
     - name: Configure QEMU
       run: |
         chmod +x ./configure
         ./configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc   --enable-usb-redir   --enable-libiscsi --audio-drv-list=pa
-        cat /home/runner/work/vectras-linux/vectras-linux/build/meson-logs/meson-log.txt
     
     - name: Compile QEMU
       run: |
