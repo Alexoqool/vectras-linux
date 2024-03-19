@@ -47,8 +47,7 @@ jobs:
         dpkg-deb --build vectras
         mv vectras.deb vectras-$ABI-2.8.4.deb
 
-    - name: Upload vectras-qemu as artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload packages
+      uses: actions/upload-artifact@v4.3.1
       with:
-       title: Linux
-           files: [ ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb ]
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
