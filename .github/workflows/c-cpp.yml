@@ -30,7 +30,7 @@ jobs:
     - name: Configure QEMU
       run: |
         chmod +x ./configure
-        ./configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc   --enable-usb-redir   --enable-libiscsi --audio-drv-list=pa
+        ./configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa
     
     - name: Compile QEMU
       run: |
