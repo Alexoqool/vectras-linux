@@ -19,7 +19,7 @@ jobs:
           echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
           echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
           apk update
-          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar rsync patch
+          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar rsync patch zip
 
     - name: Install Python dependencies
       run: |
@@ -43,12 +43,19 @@ jobs:
         mkdir ../build && cd ../build
         ../qemu-8.2.1/configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=~/vectras install
 
-    - name: Create a zip of the vectras-qemu
+    - name: Create a DEBIAN project
       run: |
-        zip -r vectras-qemu.zip ~/vectras
+        cd ~/vectras
+        mkdir DEBIAN
+        echo "Package: Vectras-VM \nVersion: 2.8.4-1 \nSection: utils \nPriority: optional \nArchitecture: musl-linux-arm64 \nMaintainer: vectrasvminc@gmail.com \nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> ~/vectras/DEBIAN/control 
+        
+    - name: Build debian files
+      run: |
+        cd ~/
+        dpkg-deb --build ~/vectras
     
     - name: Upload vectras-qemu as artifact
       uses: actions/upload-artifact@v2
       with:
         name: vectras-qemu-archive
-        path: vectras-qemu.zip
+        path: ~/vectras.deb
