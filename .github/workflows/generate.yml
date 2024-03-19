@@ -1,0 +1,59 @@
+name: Vectras VM Generate
+
+on: workflow_dispatch
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: alpine:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+          apk update
+          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar
+
+    - name: Install Python dependencies
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install sphinx==5.3.0 sphinx_rtd_theme meson
+
+    - name: Download QEMU With 3dfx and Configure QEMU
+      run: |
+        mkdir ~/vectras-qemu && cd ~/vectras-qemu
+        git clone https://github.com/kjliew/qemu-3dfx.git
+        cd qemu-3dfx
+        wget https://download.qemu.org/qemu-8.2.1.tar.xz
+        tar xf qemu-8.2.1.tar.xz
+        cd qemu-8.2.1
+        rsync -r ../qemu-0/hw/3dfx ../qemu-1/hw/mesa ./hw/
+        patch -p0 -i ../00-qemu82x-mesa-glide.patch
+        bash ../scripts/sign_commit
+        mkdir ~/vectras
+        mkdir ../build && cd ../build
+        ../qemu-8.2.1/configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa
+
+    - name: Compile QEMU
+      run: |
+        make DESTDIR=~/vectras install
+    
+
+    - name: Create a zip of the vectras-qemu
+      run: |
+        zip -r vectras-qemu.zip ~/vectras
+    
+    - name: Upload vectras-qemu as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vectras-qemu-archive
+        path: vectras-qemu.zip
