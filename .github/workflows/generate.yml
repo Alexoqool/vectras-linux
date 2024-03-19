@@ -50,5 +50,5 @@ jobs:
     - name: Upload vectras-qemu as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-archive
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-$ABI-2.8.4.deb
+       title: Linux
+           files: [ ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb ]
