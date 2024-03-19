@@ -44,7 +44,6 @@ jobs:
         mkdir DEBIAN
         echo -e "Package: Vectras-VM\r\nVersion: 2.8.4-1\r\nSection: utils\r\nPriority: optional\r\nArchitecture: musl-linux-arm64\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control 
         cd ../
-        rm vectras/usr/local/share/edk2-a*
         dpkg-deb --build vectras
         mv vectras.deb vectras-$ABI-2.8.4.deb
 
