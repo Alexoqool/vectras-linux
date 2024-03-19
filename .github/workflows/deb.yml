@@ -1,0 +1,54 @@
+name: Vectras VM Generate
+
+on: workflow_dispatch
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: alpine:latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+          apk update
+          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar rsync patch dpkg
+
+    - name: Install Python dependencies
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install sphinx==5.3.0 sphinx_rtd_theme meson
+
+    - name: Download QEMU With 3dfx and Configure QEMU
+      run: |
+        mkdir ~/vectras-qemu && cd ~/vectras-qemu
+        git clone https://github.com/kjliew/qemu-3dfx.git
+        cd qemu-3dfx
+        wget https://download.qemu.org/qemu-8.2.1.tar.xz
+        tar xf qemu-8.2.1.tar.xz
+        cd qemu-8.2.1
+        rsync -r ../qemu-0/hw/3dfx ../qemu-1/hw/mesa ./hw/
+        patch -p0 -i ../00-qemu82x-mesa-glide.patch
+        bash ../scripts/sign_commit
+        mkdir dist && cd dist
+        mkdir vectras
+        export ABI=aarch64-linux-gnu-
+        ../configure --cross-prefix=$ABI --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
+        cd vectras
+        mkdir DEBIAN
+        echo -e "Package: Vectras-VM\r\nVersion: 2.8.4-1\r\nSection: utils\r\nPriority: optional\r\nArchitecture: musl-linux-arm64\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control 
+        cd ../
+        dpkg-deb --build vectras
+        mv vectras.deb vectras-$ABI-2.8.4.deb
+
+    - name: Upload vectras-qemu as artifact
+      uses: actions/upload-artifact@v2
+      with:
+       title: Linux
+           files: [ ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb ]
