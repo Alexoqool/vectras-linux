@@ -19,6 +19,7 @@ jobs:
     
     - name: Configure
       run: |
+        chmod +x ./configure
         ./configure
     
     - name: Compile
