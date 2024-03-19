@@ -47,7 +47,7 @@ jobs:
       run: |
         cd ~/vectras
         mkdir DEBIAN
-        echo "Package: Vectras-VM\nVersion: 2.8.4-1\nSection: utils\nPriority: optional\nArchitecture: musl-linux-arm64\nMaintainer: vectrasvminc@gmail.com\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> ~/vectras/DEBIAN/control 
+        echo -e "Package: Vectras-VM\r\nVersion: 2.8.4-1\r\nSection: utils\r\nPriority: optional\r\nArchitecture: musl-linux-arm64\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> ~/vectras/DEBIAN/control 
         
     - name: Build debian files
       run: |
