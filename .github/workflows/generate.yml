@@ -48,8 +48,10 @@ jobs:
         mv vectras.deb vectras-$ABI-2.8.4.deb
 
     - name: Upload packages
-      uses: actions/upload-artifact@v4.3.1
-      with:
-        name: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
-        if-no-files-found: error
+      run: |
+        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist
+        ls *.deb | while read deb_file; do
+          echo "Uploading $deb_file"
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -H "Content-Type: application/octet-stream" --data-binary @$deb_file "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${GITHUB_RUN_ID}/assets?name=$deb_file"
+          echo "Uploaded $deb_file"
+        done
