@@ -15,11 +15,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-          echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-          echo "@community http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
           apk update
           apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev 
-            sdl2-dev@community libusbredirparser@community 
+            sdl2-dev libusbredirparser libiscsi 
             python3-dev py3-pip ninja gcc make musl-dev linux-headers
 
     - name: Install Python dependencies
