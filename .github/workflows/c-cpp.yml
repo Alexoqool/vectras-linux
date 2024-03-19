@@ -1,0 +1,19 @@
+name: C/C++ CI
+
+on: workflow_dispatch
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: configure
+      run: ./configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc   --enable-usb-redir   --enable-libiscsi
+    - name: make
+      run: make DESTDIR=/root/vectras-qemu install
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
