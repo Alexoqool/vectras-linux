@@ -19,7 +19,7 @@ jobs:
           echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
           apk update
           apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev 
-            sdl2-dev libusbredirparser libiscsi 
+            sdl2 libusbredirparser libiscsi 
             python3-dev py3-pip ninja gcc make musl-dev linux-headers
 
     - name: Install Python dependencies
