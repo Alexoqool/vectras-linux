@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         apk update
-        apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libiscsi-dev sdl2-dev libusbredirparser-dev python3-dev py3-pip ninja gcc make musl-dev linux-headers
+        apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libiscsi sdl2-dev libusbredirparser python3-dev py3-pip ninja gcc make musl-dev linux-headers
 
     - name: Install Python dependencies
       run: |
