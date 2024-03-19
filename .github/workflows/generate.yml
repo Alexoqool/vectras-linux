@@ -50,4 +50,6 @@ jobs:
     - name: Upload packages
       uses: actions/upload-artifact@v4.3.1
       with:
+        name: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
         path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
+        if-no-files-found: error
