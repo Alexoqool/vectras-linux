@@ -39,7 +39,15 @@ jobs:
         mkdir dist && cd dist
         mkdir vectras
         ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
-        cd vectras
+
+    - name: Setup debian and bios
+      run: |
+        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist
+        git clone https://github.com/ahmedbarakat2007/vectras-bios.git
+        cd vectras-bios
+        make
+        mv out/bios.bin ../vectras/usr/local/share/qemu/bios-256k.bin
+        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
         echo -e "Package: Vectras-VM\r\nVersion: 2.8.4\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control 
         cd ../
