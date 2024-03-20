@@ -47,11 +47,8 @@ jobs:
         dpkg-deb --build vectras
         mv vectras.deb vectras-$ABI-2.8.4.deb
 
-    - name: Upload packages
-      run: |
-        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist
-        ls *.deb | while read deb_file; do
-          echo "Uploading $deb_file"
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -H "Content-Type: application/octet-stream" --data-binary @$deb_file "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${GITHUB_RUN_ID}/assets?name=$deb_file"
-          echo "Uploaded $deb_file"
-        done
+    - name: Upload vectras-qemu
+      uses: actions/upload-artifact@v2
+      with:
+        name: vectras-qemu-debian-packages
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*-*.deb
