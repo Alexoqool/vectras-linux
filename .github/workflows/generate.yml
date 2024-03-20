@@ -41,7 +41,7 @@ jobs:
         ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
         cd vectras
         mkdir DEBIAN
-        echo -e "Package: Vectras-VM\r\nVersion: 2.8.4-1\r\nSection: utils\r\nPriority: optional\r\nArchitecture: musl-linux-arm64\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control 
+        echo -e "Package: Vectras-VM\r\nVersion: 2.8.4\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control 
         cd ../
         dpkg-deb --build vectras
         mv vectras.deb vectras-2.8.4.deb
