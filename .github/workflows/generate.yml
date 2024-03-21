@@ -5,35 +5,17 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: ['amd64', 'arm64v8', 'arm32v7', 'i386']
-
     steps:
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: all
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: setup docker
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        platforms: linux/${{ matrix.arch }}
-        # Specify other build-push-action parameters as needed
-        build-args: |
-          BUILD_FROM=alpine:latest
-
-    - name: Install dependencies and build
+    - name: Install dependencies
       run: |
-          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
-          apk update
-          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar rsync patch dpkg curl
+        sudo apt-get update
+        sudo apt-get install -y 
+          libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev 
+          libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip 
+          ninja-build gcc make libc6-dev linux-headers-$(uname -r) libsdl2-dev pkg-config git wget bash tar rsync patch dpkg
 
     - name: Install Python dependencies
       run: |
@@ -55,7 +37,8 @@ jobs:
         bash ../scripts/sign_commit
         mkdir dist && cd dist
         mkdir vectras
-        ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
+        ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa
+        make DESTDIR=vectras install
 
     - name: Setup debian and bios
       run: |
@@ -66,13 +49,13 @@ jobs:
         mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: vectras-vm\r\nVersion: 2.8.4\r\nArchitecture: ${{ matrix.arch }}\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\Description: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
+        echo -e "Package: vectras-vmnVersion: 2.8.4nArchitecture: x86_64nSection: utilsnPriority: optionalnMaintainer: vectrasvminc@gmail.comDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
         cd ../
         dpkg-deb --build vectras
-        mv vectras.deb vectras-${{ matrix.arch }}-2.8.4.deb
+        mv vectras.deb vectras-vm-x86_64-2.8.4.deb
 
     - name: Upload vectras-qemu
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-${{ matrix.alpine_arch }}-debian-package
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.arch }}-2.8.4.deb
+        name: vectras-qemu-x86_64-debian-package
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-vm-x86_64-2.8.4.deb
