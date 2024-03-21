@@ -9,18 +9,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - arch: arm64
-            target: aarch64-softmmu
-            debian_arch: arm64
-          - arch: arm
-            target: arm-softmmu
-            debian_arch: armhf
-          - arch: x86
-            target: i386-softmmu
-            debian_arch: i386
-          - arch: amd64
-            target: x86_64-softmmu
-            debian_arch: amd64
+          - deb_arch: arm64
+          - deb_arch: armhf
+          - deb_arch: i386
+          - deb_arch: amd64
 
     container:
       image: alpine:latest
@@ -53,7 +45,7 @@ jobs:
         bash ../scripts/sign_commit
         mkdir dist && cd dist
         mkdir vectras
-        ../configure --target-list=${{ matrix.arch }} --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
+        ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
 
     - name: Setup debian and bios
       run: |
@@ -64,13 +56,13 @@ jobs:
         mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: vectras-vmrnVersion: 2.8.4rnArchitecture: ${{ matrix.debian_arch }}rnSection: utilsrnPriority: optionalrnMaintainer: vectrasvminc@gmail.comrDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
+        echo -e "Package: vectras-vm\r\nVersion: 2.8.4\r\nArchitecture: ${{ matrix.deb_arch }}\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\Description: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
         cd ../
         dpkg-deb --build vectras
-        mv vectras.deb vectras-${{ matrix.arch }}-2.8.4.deb
+        mv vectras.deb vectras-${{ matrix.deb_arch }}-2.8.4.deb
 
     - name: Upload vectras-qemu
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-${{ matrix.arch }}-debian-package
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.arch }}-2.8.4.deb
+        name: vectras-qemu-${{ matrix.deb_arch }}-debian-package
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.deb_arch }}-2.8.4.deb
