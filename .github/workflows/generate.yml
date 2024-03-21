@@ -51,7 +51,7 @@ jobs:
         mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: vectras-vm\nVersion: 2.8.4\nArchitecture: aarch64\nSection: utils\nPriority: optional\nMaintainer: vectrasvminc@gmail.com\nDescription: Vectras VM 3dfx build\n https://vectras.netlify.com" > DEBIAN/control
+        echo -e "Package: vectras-vm\nVersion: 2.8.4\nArchitecture: arm64\nSection: utils\nPriority: optional\nMaintainer: vectrasvminc@gmail.com\nDescription: Vectras VM 3dfx build\n https://vectras.netlify.com" > DEBIAN/control
         cd ..
         dpkg-deb --build vectras
         mv vectras.deb vectras-vm-aarch64-2.8.4.deb
