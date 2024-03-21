@@ -34,10 +34,11 @@ jobs:
         bash ../scripts/sign_commit
         mkdir dist && cd dist
         mkdir vectras
+        cd ..
         # The configure script should be in this directory. Check that it's there
-        if [ -f ../configure ]; then
-          chmod +x configure
-          ../configure 
+        if [ -f configure ]; then
+          chmod +x ./configure
+          ./configure 
             --cross-prefix=aarch64-linux-gnu- 
             --target-list=aarch64-softmmu 
             --enable-spice 
@@ -52,7 +53,7 @@ jobs:
           exit 1
         fi        
         make -j$(nproc)
-        make install DESTDIR=../dist/vectras
+        make install DESTDIR=dist/vectras
 
     - name: Setup debian and bios
       run: |
