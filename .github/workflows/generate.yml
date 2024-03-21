@@ -34,11 +34,7 @@ jobs:
         bash ../scripts/sign_commit
         mkdir dist && cd dist
         mkdir vectras
-        if [ -z "${{ matrix.cross_triplet }}" ]; then
-          ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa
-        else
-          ../configure --target-list=x86_64-softmmu --cross-prefix=aarch64-linux-gnu- --enable-cross-prefix --enable-cross-compile --enable-spice --disable-kvm --enable-tcg --disable-virtfs --disable-vnc --disable-libiscsi --audio-drv-list=pa
-        fi
+        ./configure --target-list=x86_64-softmmu --cross-prefix=aarch64-linux-gnu- --enable-cross-prefix --enable-cross-compile --enable-spice --disable-kvm --enable-tcg --disable-virtfs --disable-vnc --disable-libiscsi --audio-drv-list=pa
         make -j$(nproc)
         make install DESTDIR=../dist/vectras
 
