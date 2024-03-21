@@ -38,16 +38,7 @@ jobs:
         # The configure script should be in this directory. Check that it's there
         if [ -f configure ]; then
           chmod +x ./configure
-          ./configure 
-            --cross-prefix=aarch64-linux-gnu- 
-            --target-list=aarch64-softmmu 
-            --enable-spice 
-            --disable-kvm 
-            --enable-tcg 
-            --enable-virtfs 
-            --enable-vnc 
-            --enable-libiscsi 
-            --audio-drv-list=pa
+          ./configure --cross-prefix=aarch64-linux-gnu- --target-list=aarch64-softmmu --enable-spice --disable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa
         else
           echo "Configure script not found"
           exit 1
