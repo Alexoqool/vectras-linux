@@ -35,9 +35,9 @@ jobs:
         mkdir dist && cd dist
         mkdir vectras
         # The configure script should be in this directory. Check that it's there
-        if [ -f configure ]; then
+        if [ -f ../configure ]; then
           chmod +x configure
-          ./configure 
+          ../configure 
             --cross-prefix=aarch64-linux-gnu- 
             --target-list=aarch64-softmmu 
             --enable-spice 
