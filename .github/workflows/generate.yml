@@ -9,8 +9,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - arch: arm64v8
-            qemu: x86_64-softmmu
+          - arch: arm64
+            target: aarch64-softmmu
+            debian_arch: arm64
+          - arch: arm
+            target: arm-softmmu
+            debian_arch: armhf
+          - arch: x86
+            target: i386-softmmu
+            debian_arch: i386
+          - arch: amd64
+            target: x86_64-softmmu
+            debian_arch: amd64
 
     container:
       image: alpine:latest
@@ -54,13 +64,13 @@ jobs:
         mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: Vectras-VM\r\nVersion: 2.8.4\r\nArchitecture: all\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control
+        echo -e "Package: vectras-vmrnVersion: 2.8.4rnArchitecture: ${{ matrix.debian_arch }}rnSection: utilsrnPriority: optionalrnMaintainer: vectrasvminc@gmail.comrDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
         cd ../
         dpkg-deb --build vectras
-        mv vectras.deb vectras-2.8.4.deb
+        mv vectras.deb vectras-${{ matrix.arch }}-2.8.4.deb
 
     - name: Upload vectras-qemu
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-debian-packages
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-*.deb
+        name: vectras-qemu-${{ matrix.arch }}-debian-package
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.arch }}-2.8.4.deb
