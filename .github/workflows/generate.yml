@@ -19,7 +19,7 @@ jobs:
             alpine_arch: x86
 
     container:
-      image: alpine:${{ matrix.alpine_arch }}
+      image: alpine:${{ matrix.arch }}
 
     steps:
     - name: Install dependencies
