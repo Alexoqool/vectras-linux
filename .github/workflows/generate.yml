@@ -25,8 +25,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.cross_triplet && (matrix.cross_triplet + '-gcc') || 'gcc' }} ${{ matrix.cross_triplet && (matrix.cross_triplet + '-g++') || 'g++' }} ${{ matrix.cross_triplet && (matrix.cross_triplet + '-pkg-config') || 'pkg-config' }} libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build gcc make libc6-dev linux-headers-$(uname -r) libsdl2-dev pkg-config git wget bash tar rsync patch dpkg
-
+        sudo apt-get install -y  libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build gcc make libc6-dev linux-headers-$(uname -r) libsdl2-dev pkg-config git wget bash tar rsync patch dpkg ${{{ matrix.cross_triplet }}-gcc || 'gcc' }} ${{{ matrix.cross_triplet }}-g++ || 'g++' }}
+        if [ "${{ matrix.cross_triplet }}" ]; then
+          sudo apt-get install -y ${{{ matrix.cross_triplet }}-pkg-config}
+        fi
+        
     - name: Install Python dependencies
       run: |
         python3 -m venv venv
