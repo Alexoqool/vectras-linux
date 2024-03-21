@@ -13,12 +13,20 @@ jobs:
       run: |
         sudo dpkg --add-architecture arm64
         sudo apt-get update
-        sudo apt-get install -y  libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build make libsdl2-dev pkg-config-aarch64-linux-gnu libglib2.0-dev:arm64 git wget bash tar rsync patch dpkg gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross linux-headers-generic
+        sudo apt-get install -y  libpulse-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build make libsdl2-dev pkg-config-aarch64-linux-gnu libglib2.0-dev:arm64 git wget bash tar rsync patch dpkg gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross linux-headers-generic
         sudo ln -s /usr/lib/aarch64-linux-gnu/pkgconfig /usr/lib/pkgconfig/aarch64-linux-gnu
         # Configure PKG_CONFIG_PATH for the ARM64 architecture
         echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig" >> $GITHUB_ENV
         # Confirm pkg-config is finding arm64 libraries
         pkg-config-aarch64-linux-gnu --cflags glib-2.0
+        # Install cross-compilers and related packages
+        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+        # Install necessary development libraries
+        sudo apt-get install -y libglib2.0-dev:arm64
+        # Configure PKG_CONFIG_PATH for cross-compilation
+        export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig"
+        # Required for pkg-config to find ARM64 libs
+        export PKG_CONFIG=aarch64-linux-gnu-pkg-config
         
     - name: Install Python dependencies
       run: |
@@ -41,7 +49,6 @@ jobs:
         mkdir dist && cd dist
         mkdir vectras
         cd ..
-        export PKG_CONFIG=aarch64-linux-gnu-pkg-config
         # The configure script should be in this directory. Check that it's there
         if [ -f configure ]; then
           chmod +x ./configure
