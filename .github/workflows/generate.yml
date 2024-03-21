@@ -5,19 +5,6 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: arm64-v8a
-            cross_triplet: aarch64-linux-gnu
-          - arch: armeabi-v7a
-            cross_triplet: arm-linux-gnueabihf
-          - arch: x86
-            cross_triplet: i686-linux-gnu
-          - arch: x86_64
-            cross_triplet: ""
-            
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -25,10 +12,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y  libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build gcc make libc6-dev linux-headers-$(uname -r) libsdl2-dev pkg-config git wget bash tar rsync patch dpkg ${{{ matrix.cross_triplet }}-gcc || 'gcc' }} ${{{ matrix.cross_triplet }}-g++ || 'g++' }}
-        if [ "${{ matrix.cross_triplet }}" ]; then
-          sudo apt-get install -y ${{{ matrix.cross_triplet }}-pkg-config}
-        fi
+        sudo apt-get install -y  libpulse-dev libglib2.0-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build make libsdl2-dev pkg-config git wget bash tar rsync patch dpkg gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross linux-headers-generic
         
     - name: Install Python dependencies
       run: |
@@ -53,7 +37,7 @@ jobs:
         if [ -z "${{ matrix.cross_triplet }}" ]; then
           ../configure --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa
         else
-          ../configure --target-list=${{ matrix.arch }}-linux-user --cross-prefix=${{ matrix.cross_triplet }}- --enable-cross-prefix --enable-cross-compile --enable-spice --disable-kvm --enable-tcg --disable-virtfs --disable-vnc --disable-libiscsi --audio-drv-list=pa
+          ../configure --target-list=x86_64-softmmu --cross-prefix=aarch64-linux-gnu- --enable-cross-prefix --enable-cross-compile --enable-spice --disable-kvm --enable-tcg --disable-virtfs --disable-vnc --disable-libiscsi --audio-drv-list=pa
         fi
         make -j$(nproc)
         make install DESTDIR=../dist/vectras
@@ -67,13 +51,12 @@ jobs:
         mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: vectras-vmnVersion: 2.8.4nArchitecture: x86_64nSection: utilsnPriority: optionalnMaintainer: vectrasvminc@gmail.comDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
-        cd ../
+        echo -e "Package: vectras-vm\nVersion: 2.8.4\nArchitecture: aarch64\nSection: utils\nPriority: optional\nMaintainer: vectrasvminc@gmail.com\nDescription: Vectras VM 3dfx build\n https://vectras.netlify.com" > DEBIAN/control
         dpkg-deb --build vectras
-        mv vectras.deb vectras-vm-x86_64-2.8.4.deb
+        mv vectras.deb vectras-vm-aarch64-2.8.4.deb
 
     - name: Upload vectras-qemu
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-x86_64-debian-package
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-vm-x86_64-2.8.4.deb
+        name: vectras-qemu-aarch64-debian-package
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-vm-aarch64-2.8.4.deb
