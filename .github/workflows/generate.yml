@@ -50,8 +50,6 @@ jobs:
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
         echo -e "Package: Vectras-VM\r\nVersion: 2.8.4\r\nArchitecture: all\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\nDescription: Vectras VM 3dfx build https://vectras.netlify.com" >> DEBIAN/control
-        cp -r usr/local/* usr/
-        rm -r usr/local
         cd ../
         dpkg-deb --build vectras
         mv vectras.deb vectras-2.8.4.deb
