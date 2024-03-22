@@ -5,7 +5,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
-RUN apt-get update && apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev zlib1g-dev rsync bison autoconf gawk flex gettext texinfo patch perl automake libtool pkg-config libpixman-1-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-pip python3-venv ninja-build git wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev zlib1g-dev rsync bison autoconf gawk flex gettext texinfo patch perl automake libtool libsdl2-dev pkg-config libpixman-1-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-pip python3-venv ninja-build git wget && rm -rf /var/lib/apt/lists/*
 
 # Ensure the system's pip is up-to-date
 RUN python3 -m pip install --upgrade pip
