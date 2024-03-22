@@ -5,9 +5,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
-RUN apt-get update && 
-    apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev 
-    zlib1g-dev bison autoconf gawk flex gettext texinfo 
+RUN apt-get update && apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev zlib1g-dev bison autoconf gawk flex gettext texinfo 
     patch perl automake libtool pkg-config libpixman-1-dev 
     libspice-server-dev libusbredirparser-dev libusbredirhost-dev 
     libiscsi-dev python3 python3-pip ninja-build git wget && 
@@ -29,33 +27,10 @@ ENV CROSS_PREFIX=${HOST_ARCH}-
 COPY . /vectras-vm
 
 # Download and prepare QEMU with 3dfx and configure it
-RUN mkdir /vectras-qemu && 
-    cd /vectras-qemu && 
-    git clone https://github.com/kjliew/qemu-3dfx.git && 
-    cd qemu-3dfx && 
-    wget https://download.qemu.org/qemu-8.2.1.tar.xz && 
-    tar xf qemu-8.2.1.tar.xz && 
-    cd qemu-8.2.1 && 
-    rsync -r ../qemu-0/hw/3dfx ../qemu-1/hw/mesa ./hw/ && 
-    patch -p0 -i ../00-qemu82x-mesa-glide.patch && 
-    ./scripts/sign_commit && 
-    mkdir dist && cd dist && 
-    mkdir vectras && 
-    ../configure --cross-prefix=aarch64-linux-gnu- --target-list=aarch64-softmmu --cross-prefix=${CROSS_PREFIX} --static --enable-curses --enable-cocoa --disable-gtk --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa && 
-    make DESTDIR=vectras install
+RUN mkdir /vectras-qemu && cd /vectras-qemu && git clone https://github.com/kjliew/qemu-3dfx.git && cd qemu-3dfx && wget https://download.qemu.org/qemu-8.2.1.tar.xz && tar xf qemu-8.2.1.tar.xz && cd qemu-8.2.1 && rsync -r ../qemu-0/hw/3dfx ../qemu-1/hw/mesa ./hw/ && patch -p0 -i ../00-qemu82x-mesa-glide.patch && ./scripts/sign_commit && mkdir dist && cd dist && mkdir vectras && ../configure --cross-prefix=aarch64-linux-gnu- --target-list=aarch64-softmmu --cross-prefix=${CROSS_PREFIX} --static --enable-curses --enable-cocoa --disable-gtk --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
 
 # Set up Debian and BIOS
-RUN cd /vectras-qemu/qemu-3dfx/qemu-8.2.1/dist && 
-    git clone https://github.com/ahmedbarakat2007/vectras-bios.git && 
-    cd vectras-bios && 
-    make && 
-    mv out/bios.bin ../vectras/usr/local/share/qemu/bios-256k.bin && 
-    cd ../vectras && 
-    mkdir DEBIAN && 
-    echo "Package: vectras-vmnVersion: 2.8.4nArchitecture: arm64nSection: utilsnPriority: optionalnMaintainer: vectrasvminc@gmail.comnDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control && 
-    cd .. && 
-    dpkg-deb --build vectras && 
-    mv vectras.deb vectras-arm64-2.8.4.deb
+RUN cd /vectras-qemu/qemu-3dfx/qemu-8.2.1/dist && git clone https://github.com/ahmedbarakat2007/vectras-bios.git && cd vectras-bios && make && mv out/bios.bin ../vectras/usr/local/share/qemu/bios-256k.bin && cd ../vectras && mkdir DEBIAN && echo "Package: vectras-vmnVersion: 2.8.4nArchitecture: arm64nSection: utilsnPriority: optionalnMaintainer: vectrasvminc@gmail.comnDescription: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control && cd .. && dpkg-deb --build vectras && mv vectras.deb vectras-arm64-2.8.4.deb
 
 # Entrypoint (You can change this to whatever is necessary)
 CMD ["/bin/bash"]
