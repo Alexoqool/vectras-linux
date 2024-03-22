@@ -5,20 +5,15 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    container:
-      image: alpine:latest
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Install dependencies
       run: |
-          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
-          apk update
-          apk add gawk glib-dev zlib-dev bison autoconf gawk flex gettext texinfo patch perl automake libtool pkgconfig pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar rsync patch gcc-aarch64-none-elf g++-aarch64-none-elf
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev zlib1g-dev bison autoconf gawk flex gettext texinfo patch perl automake libtool pkg-config libpixman-1-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-pip ninja-build git wget
 
     - name: Install Python dependencies
       run: |
@@ -44,7 +39,7 @@ jobs:
         export HOST_ARCH=aarch64-none-elf
         export PREFIX=/usr/local
         export CROSS_PREFIX=${HOST_ARCH}-
-        bash ../configure --prefix=${PREFIX} --host=${HOST_ARCH} --build=${BUILD_ARCH} --target-list=aarch64-softmmu --cross-prefix=${CROSS_PREFIX} --static --enable-curses --enable-cocoa --disable-gtk --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
+        ../configure --cross-prefix=aarch64-linux-gnu- --target-list=aarch64-softmmu --cross-prefix=${CROSS_PREFIX} --static --enable-curses --enable-cocoa --disable-gtk --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
 
     - name: Setup debian and bios
       run: |
