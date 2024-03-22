@@ -5,29 +5,21 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    container:
+      image: alpine:latest
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Install dependencies
       run: |
-        sudo dpkg --add-architecture arm64
-        sudo apt-get update
-        sudo apt-get install -y  libpulse-dev device-tree-compiler libpixman-1-dev zlib1g-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-venv python3-pip ninja-build make libsdl2-dev pkg-config-aarch64-linux-gnu libglib2.0-dev:arm64 git wget bash tar rsync patch dpkg gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross linux-headers-generic
-        sudo ln -s /usr/lib/aarch64-linux-gnu/pkgconfig /usr/lib/pkgconfig/aarch64-linux-gnu
-        # Configure PKG_CONFIG_PATH for the ARM64 architecture
-        echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig" >> $GITHUB_ENV
-        # Confirm pkg-config is finding arm64 libraries
-        pkg-config-aarch64-linux-gnu --cflags glib-2.0
-        # Install cross-compilers and related packages
-        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-        # Install necessary development libraries
-        sudo apt-get install -y libglib2.0-dev:arm64
-        # Configure PKG_CONFIG_PATH for cross-compilation
-        export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig"
-        # Required for pkg-config to find ARM64 libs
-        export PKG_CONFIG=aarch64-linux-gnu-pkg-config
-        
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+          echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+          apk update
+          apk add pulseaudio-dev glib-dev dtc pixman-dev zlib-dev spice-dev libusbredirparser usbredir-dev libiscsi-dev python3 py3-pip ninja gcc make musl-dev linux-headers sdl2 sdl2-dev pkgconf git wget bash tar
+
     - name: Install Python dependencies
       run: |
         python3 -m venv venv
@@ -48,17 +40,7 @@ jobs:
         bash ../scripts/sign_commit
         mkdir dist && cd dist
         mkdir vectras
-        cd ..
-        # The configure script should be in this directory. Check that it's there
-        if [ -f configure ]; then
-          chmod +x ./configure
-          ./configure --cpu=aarch64 --target-list=aarch64-softmmu --enable-spice --disable-kvm --enable-tcg --enable-virtfs --enable-vnc --enable-libiscsi --audio-drv-list=pa
-        else
-          echo "Configure script not found"
-          exit 1
-        fi        
-        make -j$(nproc)
-        make install DESTDIR=dist/vectras
+        ../configure --cpu=aarch64 --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
 
     - name: Setup debian and bios
       run: |
@@ -66,16 +48,16 @@ jobs:
         git clone https://github.com/ahmedbarakat2007/vectras-bios.git
         cd vectras-bios
         make
-        mv out/bios.bin ../vectras/usr/local/share/qemu/bios-vectras.bin
+        mv out/bios.bin ../vectras/usr/local/share/qemu/bios-256k.bin
         cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
         mkdir DEBIAN
-        echo -e "Package: vectras-vm\nVersion: 2.8.4\nArchitecture: arm64\nSection: utils\nPriority: optional\nMaintainer: vectrasvminc@gmail.com\nDescription: Vectras VM 3dfx build\n https://vectras.netlify.com" > DEBIAN/control
-        cd ..
+        echo -e "Package: vectras-vm\r\nVersion: 2.8.4\r\nArchitecture: ${{ matrix.arch }}\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\Description: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
+        cd ../
         dpkg-deb --build vectras
-        mv vectras.deb vectras-vm-aarch64-2.8.4.deb
+        mv vectras.deb vectras-${{ matrix.arch }}-2.8.4.deb
 
     - name: Upload vectras-qemu
       uses: actions/upload-artifact@v2
       with:
-        name: vectras-qemu-aarch64-debian-package
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-vm-aarch64-2.8.4.deb
+        name: vectras-qemu-${{ matrix.alpine_arch }}-debian-package
+        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.arch }}-2.8.4.deb
