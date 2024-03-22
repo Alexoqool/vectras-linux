@@ -1,62 +1,31 @@
-name: Vectras VM Generate
+name: Build QEMU for aarch64
 
-on: workflow_dispatch
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: linux/arm64
 
-    - name: Install dependencies
-      run: |
-          sudo apt-get update
-          sudo apt-get install -y crossbuild-essential-arm64 gawk libglib2.0-dev zlib1g-dev bison autoconf gawk flex gettext texinfo patch perl automake libtool pkg-config libpixman-1-dev libspice-server-dev libusbredirparser-dev libusbredirhost-dev libiscsi-dev python3 python3-pip ninja-build git wget
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Install Python dependencies
-      run: |
-        python3 -m venv venv
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install sphinx==5.3.0 sphinx_rtd_theme meson
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Download QEMU With 3dfx and Configure QEMU
-      run: |
-        mkdir ~/vectras-qemu && cd ~/vectras-qemu
-        git clone https://github.com/kjliew/qemu-3dfx.git
-        cd qemu-3dfx
-        wget https://download.qemu.org/qemu-8.2.1.tar.xz
-        tar xf qemu-8.2.1.tar.xz
-        cd qemu-8.2.1
-        rsync -r ../qemu-0/hw/3dfx ../qemu-1/hw/mesa ./hw/
-        patch -p0 -i ../00-qemu82x-mesa-glide.patch
-        bash ../scripts/sign_commit
-        mkdir dist && cd dist
-        mkdir vectras
-        export BUILD_ARCH=$(uname -m)
-        export HOST_ARCH=aarch64-none-elf
-        export PREFIX=/usr/local
-        export CROSS_PREFIX=${HOST_ARCH}-
-        ../configure --cross-prefix=aarch64-linux-gnu- --target-list=aarch64-softmmu --cross-prefix=${CROSS_PREFIX} --static --enable-curses --enable-cocoa --disable-gtk --target-list=x86_64-softmmu --enable-spice --enable-kvm --enable-tcg   --enable-virtfs   --enable-vnc  --enable-libiscsi --audio-drv-list=pa && make DESTDIR=vectras install
+      - name: Build and run the Docker Image
+        run: |
+          echo "Building QEMU for ARM64 (aarch64)"
+          docker buildx build --platform linux/arm64 --load -t qemu-builder -f Dockerfile.arm64 .
+          docker run --rm qemu-builder
 
-    - name: Setup debian and bios
-      run: |
-        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist
-        git clone https://github.com/ahmedbarakat2007/vectras-bios.git
-        cd vectras-bios
-        make
-        mv out/bios.bin ../vectras/usr/local/share/qemu/bios-256k.bin
-        cd ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras
-        mkdir DEBIAN
-        echo -e "Package: vectras-vm\r\nVersion: 2.8.4\r\nArchitecture: ${{ matrix.arch }}\r\nSection: utils\r\nPriority: optional\r\nMaintainer: vectrasvminc@gmail.com\r\Description: Vectras VM 3dfx build https://vectras.netlify.com" > DEBIAN/control
-        cd ../
-        dpkg-deb --build vectras
-        mv vectras.deb vectras-${{ matrix.arch }}-2.8.4.deb
-
-    - name: Upload vectras-qemu
-      uses: actions/upload-artifact@v2
-      with:
-        name: vectras-qemu-${{ matrix.alpine_arch }}-debian-package
-        path: ~/vectras-qemu/qemu-3dfx/qemu-8.2.1/dist/vectras-${{ matrix.arch }}-2.8.4.deb
+      - name: Save artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: qemu-arm64
+          path: qemu/aarch64-softmmu/qemu-system-aarch64
